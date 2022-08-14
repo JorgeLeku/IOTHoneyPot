@@ -2,12 +2,16 @@ import threading
 import requests
 import socket
 import json
-import pickle
+import sys
+sys.path.append('../API/')
 from random import getrandbits
 from ipaddress import IPv4Address
 from netaddr import IPNetwork, IPAddress
 from datetime import date, datetime
 from urllib.request import urlopen
+from apiArchivos import leerDatos, guardarDatos
+from clasificarRespuestas import clasificarPuertos
+
 
 ipsAOmitir = ['0.0.0.0/8', '3.0.0.0/8', '6.0.0.0/7', '10.0.0.0/8', '11.0.0.0/8', '15.0.0.0/7', '21.0.0.0/8', '22.0.0.0/8', '26.0.0.0/8', '28.0.0.0/7', '30.0.0.0/8', '33.0.0.0/8', '55.0.0.0/8', '56.0.0.0/8', '100.64.0.0/10', '127.0.0.0/8', '169.254.0.0/16', '172.16.0.0/14', '192.168.0.0/16', '198.18.0.0/15', '214.0.0.0/7', '224.0.0.0/4']
 puertosComunes =  [21, 22, 23, 25, 80, 81, 82, 83, 84, 88, 137, 143, 443, 445, 554, 631, 1080, 1883, 1900, 2000, 2323, 4433, 4443, 4567, 5222, 5683, 7474, 7547, 8000, 8023, 8080, 8081, 8443, 8088, 8883, 8888, 9000, 9090, 9999, 10000, 37777, 49152]
@@ -67,71 +71,9 @@ def lanzarGet(ip, puerto):
         r = requests.get(url, verify=False, timeout=2)
         print(r)
         return r.headers
-        r = urlopen(url, timeout=3, verify=False)
-        string = r.read().decode('utf-8')
-        json_obj = json.loads(string)
-        return json_obj
     except Exception as e:
         return 'JSON vacio'
-    
-def leerDatos (nomArchivo):
-    archivo = open(nomArchivo, 'rb')
-    try:
-        datos = pickle.load(archivo)
-    except EOFError:
-        datos = set()
-    archivo.close()
-    return datos
 
-def guardarDatos (nombreArchivo, datos):
-    archivo = open(nombreArchivo, 'wb')
-    pickle.dump(datos, archivo)
-    archivo.close()
-
-def clasificarPuertos (respuesta, ip, puerto):
-    hikvision = leerDatos('datosHikvision.dat')
-    sonicwall = leerDatos('datosSonicwall.dat')
-    netgear = leerDatos('datosNetgear.dat')
-    tr069 = leerDatos('datosTR069.dat')
-    lighttpd = leerDatos('datosLighttpd.dat')
-    huawei = leerDatos('datosHuawei.dat')
-    kangle = leerDatos('datosKangle.dat')
-    tplink = leerDatos('datosTpLink.dat')
-    webapp = leerDatos('datosWebApp.dat')
-    logitech = leerDatos('datosLogitech.dat')
-    rh = json.dumps(respuesta.__dict__['_store'])
-    print(respuesta)
-    if 'Hikvision'.lower() in rh.lower() or 'DVRDVS'.lower() in rh.lower():
-        hikvision.add(ip + ":" + str(puerto))
-    elif 'SonicWALL'.lower() in rh.lower():
-        sonicwall.add(ip + ":" + str(puerto))
-    elif 'NETGEAR'.lower() in rh.lower():
-        netgear.add(ip + ":" + str(puerto))
-    elif 'TR069'.lower() in rh.lower() or 'gSOAP'.lower() in rh.lower() or 'TR-069'.lower() in rh.lower():
-        tr069.add(ip + ":" + str(puerto))
-    elif 'lighttpd'.lower() in rh.lower():
-        lighttpd.add(ip + ":" + str(puerto))
-    elif 'HuaweiHomeGateway'.lower() in rh.lower():
-        huawei.add(ip + ":" + str(puerto))
-    elif 'kangle'.lower() in rh.lower():
-        kangle.add(ip + ":" + str(puerto))
-    elif 'TP-LINK'.lower() in rh.lower():
-        tplink.add(ip + ":" + str(puerto))
-    elif 'Logitech'.lower() in rh.lower():
-        logitech.add(ip + ":" + str(puerto))
-    elif 'App-webs'.lower() in rh.lower():
-        webapp.add(ip + ":" + str(puerto))
-    hikvision = guardarDatos('datosHikvision.dat')
-    sonicwall = guardarDatos('datosSonicwall.dat')
-    netgear = guardarDatos('datosNetgear.dat')
-    tr069 = guardarDatos('datosTR069.dat')
-    lighttpd = guardarDatos('datosLighttpd.dat')
-    huawei = guardarDatos('datosHuawei.dat')
-    kangle = guardarDatos('datosKangle.dat')
-    tplink = guardarDatos('datosTpLink.dat')
-    webapp = guardarDatos('datosWebApp.dat')
-    logitech = guardarDatos('datosLogitech.dat')
-    
 def comprobarRespuestaPuertos (ip, puertos):
     for puerto in puertos:
         print(puerto)
@@ -144,7 +86,7 @@ def main ():
     total = 0
     try:
         while True:
-            ipsLeidas = leerDatos('ipsLeidas.dat')
+            ipsLeidas = leerDatos('../IoT_Device_Searcher/datos/ipsLeidas.dat')
             ip = generarIPsAleatorias()
             if ip not in ipsLeidas:
                 ipsLeidas.add(ip)
@@ -152,7 +94,7 @@ def main ():
                     total, puertosActivos = escaneo(ip)
             if total > 0:
                 comprobarRespuestaPuertos(ip, puertosActivos)
-            ipsLeidas = guardarDatos('ipsLeidas.dat', ipsLeidas)
+            ipsLeidas = guardarDatos('../IoT_Device_Searcher/datos/ipsLeidas.dat', ipsLeidas)
     except KeyboardInterrupt:
         pass
     
