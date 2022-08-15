@@ -31,7 +31,8 @@ def conectarse (puerto, ip, delay, respuesta):
     TCPsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     TCPsock.settimeout(delay)
     try:
-        TCPsock.connect((ip, puerto))
+        TCPsock.connect((str(ip), puerto))
+        print("Puerto responde ")
         for puertos in range(len(puertosComunes)):
             if puerto in puertosComunes:
                 print(puerto)
@@ -60,12 +61,14 @@ def escaneo(ip):
     joinHilos(hilos)
     for puertos in range(len(puertosComunes)):
         if respuesta[puertosComunes[puertos]] == 'Puerto escuchando':
-            puertosActivos.append[puertosComunes[puertos]]
+            print(puertosComunes[puertos])
+            puertosActivos.append([puertosComunes[puertos]])
+            print(puertosActivos)
             escuchandoTotal +=1
     return escuchandoTotal, puertosActivos
 
 def lanzarGet(ip, puerto):
-    url = 'http://' + ip + ':' + str(puerto)
+    url = 'http://' + str (ip) + ':' + str(puerto)
     print("aaaa")
     try:
         r = requests.get(url, verify=False, timeout=2)
@@ -75,12 +78,14 @@ def lanzarGet(ip, puerto):
         return 'JSON vacio'
 
 def comprobarRespuestaPuertos (ip, puertos):
+    print("Comprobar respuesta Puertos")
     for puerto in puertos:
+        print("Comprobar respuesta Puertos " + str (puerto[0]))
         print(puerto)
-        respuesta = lanzarGet(ip, puerto)
+        respuesta = lanzarGet(ip, str (puerto[0]))
         if respuesta != 'JSON vacio':
             print(respuesta)
-            clasificarPuertos()
+            clasificarPuertos(respuesta, str(ip), str (puerto[0]))
 
 def main ():
     total = 0
