@@ -15,6 +15,7 @@ from clasificarRespuestas import clasificarPuertos
 
 ipsAOmitir = ['0.0.0.0/8', '3.0.0.0/8', '6.0.0.0/7', '10.0.0.0/8', '11.0.0.0/8', '15.0.0.0/7', '21.0.0.0/8', '22.0.0.0/8', '26.0.0.0/8', '28.0.0.0/7', '30.0.0.0/8', '33.0.0.0/8', '55.0.0.0/8', '56.0.0.0/8', '100.64.0.0/10', '127.0.0.0/8', '169.254.0.0/16', '172.16.0.0/14', '192.168.0.0/16', '198.18.0.0/15', '214.0.0.0/7', '224.0.0.0/4']
 puertosComunes =  [21, 22, 23, 25, 80, 81, 82, 83, 84, 88, 137, 143, 443, 445, 554, 631, 1080, 1883, 1900, 2000, 2323, 4433, 4443, 4567, 5222, 5683, 7474, 7547, 8000, 8023, 8080, 8081, 8443, 8088, 8883, 8888, 9000, 9090, 9999, 10000, 37777, 49152]
+headers = {'User-Agent': None, 'Host': None, 'Accept-Encoding': None, 'Accept': None, 'Connection': None}
 
 def generarIPsAleatorias ():
     ip = (IPv4Address(getrandbits(32)))
@@ -86,6 +87,17 @@ def comprobarRespuestaPuertos (ip, puertos):
         if respuesta != 'JSON vacio':
             print(respuesta)
             clasificarPuertos(respuesta, str(ip), str (puerto[0]))
+            enviarGet(ip, puerto)
+
+def enviarGet (ip, puerto):
+    datosRespuestasPorDefecto = leerDatos('../IoT_Device_Searcher/datos/datosRespuestasPorDefecto.dat')
+    try:
+        resp = requests.get('http://' + str(ip) + ":" + str(puerto[0]) + '/login.cgi', headers=headers, verify=False, timeout=2)
+        print(str(resp))
+        datosRespuestasPorDefecto.add(resp)
+        guardarDatos('../IoT_Device_Searcher/datos/datosRespuestasPorDefecto.dat', datosRespuestasPorDefecto)
+    except:
+        print('Error al pedir login a: ' + str(ip) + ':' + str(puerto))
 
 def main ():
     total = 0
@@ -99,7 +111,7 @@ def main ():
                     total, puertosActivos = escaneo(ip)
             if total > 0:
                 comprobarRespuestaPuertos(ip, puertosActivos)
-            ipsLeidas = guardarDatos('../IoT_Device_Searcher/datos/ipsLeidas.dat', ipsLeidas)
+            guardarDatos('../IoT_Device_Searcher/datos/ipsLeidas.dat', ipsLeidas)
     except KeyboardInterrupt:
         pass
     
