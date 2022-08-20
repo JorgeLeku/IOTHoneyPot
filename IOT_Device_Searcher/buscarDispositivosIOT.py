@@ -8,25 +8,30 @@ from random import getrandbits
 from ipaddress import IPv4Address
 from netaddr import IPNetwork, IPAddress
 from datetime import date, datetime
-from urllib.request import urlopen
-from apiArchivos import leerDatos, guardarDatos
+from apiArchivos import leerDatos, guardarDatos, leerDatosTxt
 from clasificarRespuestas import clasificarPuertos
 
 
-ipsAOmitir = ['0.0.0.0/8', '3.0.0.0/8', '6.0.0.0/7', '10.0.0.0/8', '11.0.0.0/8', '15.0.0.0/7', '21.0.0.0/8', '22.0.0.0/8', '26.0.0.0/8', '28.0.0.0/7', '30.0.0.0/8', '33.0.0.0/8', '55.0.0.0/8', '56.0.0.0/8', '100.64.0.0/10', '127.0.0.0/8', '169.254.0.0/16', '172.16.0.0/14', '192.168.0.0/16', '198.18.0.0/15', '214.0.0.0/7', '224.0.0.0/4']
-puertosComunes =  [21, 22, 23, 25, 80, 81, 82, 83, 84, 88, 137, 143, 443, 445, 554, 631, 1080, 1883, 1900, 2000, 2323, 4433, 4443, 4567, 5222, 5683, 7474, 7547, 8000, 8023, 8080, 8081, 8443, 8088, 8883, 8888, 9000, 9090, 9999, 10000, 37777, 49152]
 headers = {'User-Agent': None, 'Host': None, 'Accept-Encoding': None, 'Accept': None, 'Connection': None}
-
+puertosComunes = []
+# Genera una IP aleatoria
 def generarIPsAleatorias ():
     ip = (IPv4Address(getrandbits(32)))
     return ip
 
+# Recoge los puertos comunes usados en dispositivos IoT
+def leerPuertos():
+    puertosComunes = leerDatosTxt("../IoT_Device_Searcher/datos/IPsAIgnorar.txt")
+    
+# Omite las ips introducidas por defecto, para de esta forma evitar analizar IPs no deseadas
 def omitirIPs (ip):
+    ipsAOmitir = leerDatosTxt("../IoT_Device_Searcher/datos/IPsAIgnorar.txt")
     for omitir in ipsAOmitir:
         if (IPAddress(str(ip))) in IPNetwork(omitir):
             return False
     return True
 
+# Se conecta a los diferentes puertos de una IP en busca de un puerto abierto
 def conectarse (puerto, ip, delay, respuesta):
     TCPsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     TCPsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -34,13 +39,13 @@ def conectarse (puerto, ip, delay, respuesta):
     try:
         TCPsock.connect((str(ip), puerto))
         print("Puerto responde ")
-        for puertos in range(len(puertosComunes)):
-            if puerto in puertosComunes:
-                print(puerto)
+        if puerto in puertosComunes:
+            print(puerto)
         respuesta[puerto] = 'Puerto escuchando'
     except:
         respuesta[puerto] = ''
 
+# Genera tantos hilos como puertos para realizar una busqueda en cada hilo y así ser mas eficiente
 def iniciarHilos (hilos):
     for puertos in range(len(puertosComunes)):
         hilos[puertos].start()
@@ -49,6 +54,7 @@ def joinHilos (hilos):
     for puertos in range(len(puertosComunes)):
         hilos[puertos].join()
  
+# Realiza un escaneo de la IP en busca de puertos abiertos
 def escaneo(ip):
     t1 = datetime.now()
     hilos = []
@@ -68,6 +74,7 @@ def escaneo(ip):
             escuchandoTotal +=1
     return escuchandoTotal, puertosActivos
 
+# En el caso de que se encuentre un puerto abierto, lanza un get para recoger respuestas
 def lanzarGet(ip, puerto):
     url = 'http://' + str (ip) + ':' + str(puerto)
     print("aaaa")
@@ -78,6 +85,7 @@ def lanzarGet(ip, puerto):
     except Exception as e:
         return 'JSON vacio'
 
+# Comprueba que la respuesta obtenida en lanzarGet sea valida y si es asi la envia a clasificarRespuestas para clasificarla y guardarla
 def comprobarRespuestaPuertos (ip, puertos):
     print("Comprobar respuesta Puertos")
     for puerto in puertos:
@@ -89,6 +97,7 @@ def comprobarRespuestaPuertos (ip, puertos):
             clasificarPuertos(respuesta, str(ip), str (puerto[0]))
             enviarGet(ip, puerto)
 
+# Lanza un get para obtener las respuestas que devolveremos nosotros en el honeypot
 def enviarGet (ip, puerto):
     datosRespuestasPorDefecto = leerDatos('../IoT_Device_Searcher/datos/datosRespuestasPorDefecto.dat')
     try:
@@ -99,6 +108,7 @@ def enviarGet (ip, puerto):
     except:
         print('Error al pedir login a: ' + str(ip) + ':' + str(puerto))
 
+# Metodo main
 def main ():
     total = 0
     try:
