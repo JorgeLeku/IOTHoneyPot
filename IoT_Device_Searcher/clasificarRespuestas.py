@@ -6,7 +6,8 @@ from apiArchivos import leerDatos, guardarDatos
 # Organiza las respuestas en diferentes archivos
 def clasificarPuertos (respuesta, ip, puerto):
     guardarEn = ''
-    rh = json.dumps(respuesta.__dict__['_store'])      
+    rh = json.dumps(respuesta.__dict__['_store'])     
+    print(respuesta) 
     if 'kangle'.lower() in rh.lower():
         guardarEn = 'datosKangleResp'
         abrir(guardarEn)

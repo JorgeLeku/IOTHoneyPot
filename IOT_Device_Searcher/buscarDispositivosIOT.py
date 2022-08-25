@@ -21,7 +21,8 @@ def generarIPsAleatorias ():
 
 # Recoge los puertos comunes usados en dispositivos IoT
 def leerPuertos():
-    puertosComunes = leerDatosTxt("../IoT_Device_Searcher/datos/IPsAIgnorar.txt")
+    global puertosComunes
+    puertosComunes = leerDatosTxt("../IoT_Device_Searcher/datos/PuertosABuscar.txt")
     
 # Omite las ips introducidas por defecto, para de esta forma evitar analizar IPs no deseadas
 def omitirIPs (ip):
@@ -111,6 +112,7 @@ def enviarGet (ip, puerto):
 # Metodo main
 def main ():
     total = 0
+    leerPuertos()
     try:
         while True:
             ipsLeidas = leerDatos('../IoT_Device_Searcher/datos/ipsLeidas.dat')
