@@ -20,7 +20,7 @@ def inicializarDatos():
 def responderAConexion(connection, client_address, ip):
     while True:
         dato = connection.recv(16)
-        dt =+ dato
+        dt =+ str(dato)
         print('dato {!r}'.format(dato))
         if dato:
             print('Respondiendo al cliente')
@@ -29,22 +29,26 @@ def responderAConexion(connection, client_address, ip):
         else:
             print('sin datos del cliente', client_address)
             break
-    return(dt, dato)
+    return(dt, dir)
 
 def main():
     ip = inicializarDatos()
     try:
         while True:
-            datos = leerDatos('../IoTHoneyPot/DatosObtenidos/puerto' + ip + '.dat')
-            ips = leerDatos('../IoTHoneyPot/IPsConectadas/puerto' + ip + '.dat')
+            datos = leerDatos('../IoT_HoneyPot/DatosObtenidos/puerto' + str(ip[1]) + '.dat')
+            ips = leerDatos('../IoT_HoneyPot/IPsConectadas/puerto' + str(ip[1]) + '.dat')
             print('A la espera')
-            conn, dirCli = sock.accept()
+            try:
+                conn, dirCli = sock.accept()
+            except KeyboardInterrupt:
+                print("Cancelado. Terminando ejecución")
+
+            print('Conexion recibida de', dirCli)
+            dt, dir = responderAConexion(conn, dirCli, ip, datos)
             ips.add(dir)
-            print('Conexion recivida de', dirCli)
-            dt, dato = responderAConexion(conn, dirCli, ip, datos)
-            datos.add(dato)
-            guardarDatos('../IoTHoneyPot/IPsConectadas/puerto' + ip + '.dat', ips)
-            guardarDatos('../IoTHoneyPot/DatosObtenidos/puerto' + ip + '.dat', dt)
+            datos.add(dt)
+            guardarDatos('../IoT_HoneyPot/IPsConectadas/puerto' + str(ip) + '.dat', ips)
+            guardarDatos('../IoT_HoneyPot/DatosObtenidos/puerto' + str(ip) + '.dat', dt)
     except KeyboardInterrupt:
         print("Cancelado. Terminando ejecución")
 
