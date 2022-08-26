@@ -9,14 +9,14 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 respuestas = leerDatos('../IoT_Device_Searcher/datos/datosRespuestasPorDefecto.dat')
 
 def inicializarDatos():
-    puerto = int(input("Introducir puerto: "))
-    ipSrv = str(input("Introducir IP: "))
+    puerto = sys.argv[1]
+    ipSrv = sys.argv[0]
     ip = (ipSrv, puerto)
     print('inicializando servidor en la ip {} y puerto {}'.format(*ip))
     sock.bind(ip)
     sock.listen(1)
     return(ip)
-    
+
 def responderAConexion(connection, client_address, ip):
     while True:
         dato = connection.recv(16)
