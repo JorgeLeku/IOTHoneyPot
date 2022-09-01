@@ -9,8 +9,8 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 respuestas = leerDatos('../BuscarDispositivosIoT/datos/datosRespuestasPorDefecto.dat')
 
 def inicializarDatos():
-    puerto = sys.argv[1]
-    ipSrv = sys.argv[0]
+    puerto = sys.argv[2]
+    ipSrv = str(sys.argv[1])
     ip = (ipSrv, puerto)
     print('inicializando servidor en la ip {} y puerto {}'.format(*ip))
     sock.bind(ip)
