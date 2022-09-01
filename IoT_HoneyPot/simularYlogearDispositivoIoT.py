@@ -6,7 +6,7 @@ sys.path.append('../API/')
 from apiArchivos import leerDatos, guardarDatos
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-respuestas = leerDatos('../IoT_Device_Searcher/datos/datosRespuestasPorDefecto.dat')
+respuestas = leerDatos('../BuscarDispositivosIoT/datos/datosRespuestasPorDefecto.dat')
 
 def inicializarDatos():
     puerto = sys.argv[1]

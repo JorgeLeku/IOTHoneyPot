@@ -56,9 +56,9 @@ def clasificarPuertos (respuesta, ip, puerto):
     
 # Abre el archivo en concreto
 def abrir(archivo):
-    archivo = leerDatos('../IoT_Device_Searcher/datos/RespuestasCompletas/' + archivo + '.dat')
+    archivo = leerDatos('../BuscarDispositivosIoT/datos/RespuestasCompletas/' + archivo + '.dat')
     return archivo
 
 # Guarda los datos en el archivo
 def guardar(dato, archivo):
-    guardarDatos('../IoT_Device_Searcher/datos/RespuestasCompletas/' + dato + '.dat', archivo)
+    guardarDatos('../BuscarDispositivosIoT/datos/RespuestasCompletas/' + dato + '.dat', archivo)

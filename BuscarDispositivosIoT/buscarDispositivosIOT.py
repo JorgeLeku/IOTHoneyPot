@@ -22,11 +22,11 @@ def generarIPsAleatorias ():
 # Recoge los puertos comunes usados en dispositivos IoT
 def leerPuertos():
     global puertosComunes
-    puertosComunes = leerDatosTxt("../IoT_Device_Searcher/datos/PuertosABuscar.txt")
+    puertosComunes = leerDatosTxt("../BuscarDispositivosIoT/datos/PuertosABuscar.txt")
     
 # Omite las ips introducidas por defecto, para de esta forma evitar analizar IPs no deseadas
 def omitirIPs (ip):
-    ipsAOmitir = leerDatosTxt("../IoT_Device_Searcher/datos/IPsAIgnorar.txt")
+    ipsAOmitir = leerDatosTxt("../BuscarDispositivosIoT/datos/IPsAIgnorar.txt")
     for omitir in ipsAOmitir:
         if (IPAddress(str(ip))) in IPNetwork(omitir):
             return False
@@ -100,12 +100,12 @@ def comprobarRespuestaPuertos (ip, puertos):
 
 # Lanza un get para obtener las respuestas que devolveremos nosotros en el honeypot
 def enviarGet (ip, puerto):
-    datosRespuestasPorDefecto = leerDatos('../IoT_Device_Searcher/datos/datosRespuestasPorDefecto.dat')
+    datosRespuestasPorDefecto = leerDatos('../BuscarDispositivosIoT/datos/datosRespuestasPorDefecto.dat')
     try:
         resp = requests.get('http://' + str(ip) + ":" + str(puerto[0]) + '/login.cgi', headers=headers, verify=False, timeout=2)
         print(str(resp))
         datosRespuestasPorDefecto.add(resp)
-        guardarDatos('../IoT_Device_Searcher/datos/datosRespuestasPorDefecto.dat', datosRespuestasPorDefecto)
+        guardarDatos('../BuscarDispositivosIoT/datos/datosRespuestasPorDefecto.dat', datosRespuestasPorDefecto)
     except:
         print('Error al pedir login a: ' + str(ip) + ':' + str(puerto))
 
@@ -115,7 +115,7 @@ def main ():
     leerPuertos()
     try:
         while True:
-            ipsLeidas = leerDatos('../IoT_Device_Searcher/datos/ipsLeidas.dat')
+            ipsLeidas = leerDatos('../BuscarDispositivosIoT/datos/ipsLeidas.dat')
             ip = generarIPsAleatorias()
             if ip not in ipsLeidas:
                 ipsLeidas.add(ip)
@@ -123,7 +123,7 @@ def main ():
                     total, puertosActivos = escaneo(ip)
             if total > 0:
                 comprobarRespuestaPuertos(ip, puertosActivos)
-            guardarDatos('../IoT_Device_Searcher/datos/ipsLeidas.dat', ipsLeidas)
+            guardarDatos('../BuscarDispositivosIoT/datos/ipsLeidas.dat', ipsLeidas)
     except KeyboardInterrupt:
         pass
     
