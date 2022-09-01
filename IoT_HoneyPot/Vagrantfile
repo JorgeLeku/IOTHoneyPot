@@ -25,6 +25,12 @@ Vagrant.configure("2") do |config|
 		python3-pip install -r requierements.txt
 		# Sustituir la ip por la del servidor y el puerto por el puerto que se quiera usar para escuchar
 		python3 simularYlogearDispositivoIoT.py localhost 21
+		# Sustituir INTRODUCIR_URL por la url del servidor elastic
+		# Sustituir INTRODUCIR_TOKEN por el token del servidor elastic
         sudo usermod -aG docker $USER	
+		curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-8.4.1-linux-x86_64.tar.gz
+		tar xzvf elastic-agent-8.4.1-linux-x86_64.tar.gz
+		cd elastic-agent-8.4.1-linux-x86_64
+		sudo ./elastic-agent install --url=INTRODUCIR_URL --enrollment-token=INTRODUCIR_TOKEN
 	SHELL
 end

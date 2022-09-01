@@ -10,24 +10,30 @@ respuestas = leerDatos('../BuscarDispositivosIoT/datos/datosRespuestasPorDefecto
 
 def inicializarDatos():
     puerto = sys.argv[2]
-    ipSrv = str(sys.argv[1])
-    ip = (ipSrv, puerto)
+    ipSrv = sys.argv[1]
+    ip = (ipSrv, int(puerto))
+    print('ip ' + ipSrv + ' puerto ' + puerto)
     print('inicializando servidor en la ip {} y puerto {}'.format(*ip))
     sock.bind(ip)
     sock.listen(1)
     return(ip)
 
-def responderAConexion(connection, client_address, ip):
+def responderAConexion(connection, dirCli, ip):
+    dt = ''
     while True:
         dato = connection.recv(16)
-        dt =+ str(dato)
+        print(dato)
+        dt = dt+ str(dato)
+
         print('dato {!r}'.format(dato))
         if dato:
             print('Respondiendo al cliente')
+
             dir, response = random.choice(list(respuestas.items()))
+            
             connection.sendall(response.content)
         else:
-            print('sin datos del cliente', client_address)
+            print('sin datos del cliente', dirCli)
             break
     return(dt, dir)
 
@@ -37,6 +43,8 @@ def main():
         while True:
             datos = leerDatos('../IoT_HoneyPot/DatosObtenidos/puerto' + str(ip[1]) + '.dat')
             ips = leerDatos('../IoT_HoneyPot/IPsConectadas/puerto' + str(ip[1]) + '.dat')
+            print(datos)
+            print(ips)
             print('A la espera')
             try:
                 conn, dirCli = sock.accept()
@@ -44,11 +52,13 @@ def main():
                 print("Cancelado. Terminando ejecución")
 
             print('Conexion recibida de', dirCli)
-            dt, dir = responderAConexion(conn, dirCli, ip, datos)
-            ips.add(dir)
+            dt, dir = responderAConexion(conn, dirCli, ip)
+            ips.add(dirCli)
             datos.add(dt)
-            guardarDatos('../IoT_HoneyPot/IPsConectadas/puerto' + str(ip) + '.dat', ips)
-            guardarDatos('../IoT_HoneyPot/DatosObtenidos/puerto' + str(ip) + '.dat', dt)
+            print('ips ' + str(ips))
+            print('datos ' + str(datos))
+            guardarDatos('../IoT_HoneyPot/IPsConectadas/puerto' + str(ip[1]) + '.dat', ips)
+            guardarDatos('../IoT_HoneyPot/DatosObtenidos/puerto' + str(ip[1]) + '.dat', datos)
     except KeyboardInterrupt:
         print("Cancelado. Terminando ejecución")
 
