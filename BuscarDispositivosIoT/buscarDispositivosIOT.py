@@ -38,12 +38,12 @@ def conectarse (puerto, ip, delay, respuesta):
     TCPsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     TCPsock.settimeout(delay)
     try:
-        TCPsock.connect((str(ip), puerto))
+        TCPsock.connect((str(ip), int(puerto)))
         print("Puerto responde ")
         if puerto in puertosComunes:
             print(puerto)
         respuesta[puerto] = 'Puerto escuchando'
-    except:
+    except Exception as e:
         respuesta[puerto] = ''
 
 # Genera tantos hilos como puertos para realizar una busqueda en cada hilo y así ser mas eficiente
@@ -69,6 +69,7 @@ def escaneo(ip):
     joinHilos(hilos)
     for puertos in range(len(puertosComunes)):
         if respuesta[puertosComunes[puertos]] == 'Puerto escuchando':
+            print("aaa")
             print(puertosComunes[puertos])
             puertosActivos.append([puertosComunes[puertos]])
             print(puertosActivos)
@@ -84,6 +85,7 @@ def lanzarGet(ip, puerto):
         print(r)
         return r.headers
     except Exception as e:
+        print(e)
         return 'JSON vacio'
 
 # Comprueba que la respuesta obtenida en lanzarGet sea valida y si es asi la envia a clasificarRespuestas para clasificarla y guardarla
