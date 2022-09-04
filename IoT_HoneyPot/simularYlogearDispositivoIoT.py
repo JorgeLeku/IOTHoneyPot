@@ -12,7 +12,6 @@ def inicializarDatos():
     puerto = sys.argv[2]
     ipSrv = sys.argv[1]
     ip = (ipSrv, int(puerto))
-    print('ip ' + ipSrv + ' puerto ' + puerto)
     print('inicializando servidor en la ip {} y puerto {}'.format(*ip))
     sock.bind(ip)
     sock.listen(1)
@@ -43,8 +42,6 @@ def main():
         while True:
             datos = leerDatos('../IoT_HoneyPot/DatosObtenidos/puerto' + str(ip[1]) + '.dat')
             ips = leerDatos('../IoT_HoneyPot/IPsConectadas/puerto' + str(ip[1]) + '.dat')
-            print(datos)
-            print(ips)
             print('A la espera')
             try:
                 conn, dirCli = sock.accept()
